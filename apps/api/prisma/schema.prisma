@@ -1,0 +1,201 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum MeritTxnType {
+  WOODEN_FISH_TAP
+  MERIT_TRANSFER_IN
+  MERIT_TRANSFER_OUT
+}
+
+enum ArgumentSessionStatus {
+  ACTIVE
+  FINISHED
+}
+
+enum MeditationTrackCategory {
+  GREAT_COMPASSION_MANTRA
+  CALM_MUSIC
+  WHITE_NOISE
+  NATURE_SOUND
+}
+
+model User {
+  id         String   @id @default(uuid())
+  shortId    String   @unique
+  email      String   @unique
+  nickname   String
+  avatarUrl  String?
+  totalMerit Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  dailyStats             UserDailyStats[]
+  meritTxns              MeritTransaction[]
+  sentFriendRequests     FriendRequest[]            @relation("SentRequests")
+  receivedFriendRequests FriendRequest[]            @relation("ReceivedRequests")
+  friendshipsA           Friendship[]               @relation("UserA")
+  friendshipsB           Friendship[]               @relation("UserB")
+  practiceSessions       ArgumentPracticeSession[]
+  analysisRecords        ArgumentAnalysisRecord[]
+  meditationSessions     MeditationSession[]
+  privacyAcks            PrivacyAcknowledgement[]
+}
+
+model UserDailyStats {
+  id            String @id @default(uuid())
+  userId        String
+  dateKey       String
+  todayMerit    Int    @default(0)
+  todayFortune  Int    @default(0)
+  meditationSec Int    @default(0)
+  user          User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, dateKey])
+}
+
+model MeritTransaction {
+  id              String       @id @default(uuid())
+  userId          String
+  type            MeritTxnType
+  amount          Int
+  balanceAfter    Int
+  counterpartyId  String?
+  clientRequestId String
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+  user            User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, createdAt])
+}
+
+model FriendRequest {
+  id         String              @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  fromUser   User                @relation("SentRequests", fields: [fromUserId], references: [id])
+  toUser     User                @relation("ReceivedRequests", fields: [toUserId], references: [id])
+
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+}
+
+model Friendship {
+  id        String   @id @default(uuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime @default(now())
+  userA     User     @relation("UserA", fields: [userAId], references: [id])
+  userB     User     @relation("UserB", fields: [userBId], references: [id])
+
+  @@unique([userAId, userBId])
+}
+
+model ArgumentPracticeSession {
+  id            String                @id @default(uuid())
+  userId        String
+  status        ArgumentSessionStatus @default(ACTIVE)
+  opponentLabel String
+  relationship  String
+  whatHappened  String
+  practiceGoal  String
+  opponentStyle String
+  createdAt     DateTime              @default(now())
+  finishedAt    DateTime?
+  user          User                  @relation(fields: [userId], references: [id])
+  messages      ArgumentPracticeMessage[]
+  review        ArgumentPracticeReview?
+}
+
+model ArgumentPracticeMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+  session   ArgumentPracticeSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, createdAt])
+}
+
+model ArgumentPracticeReview {
+  id                       String @id @default(uuid())
+  sessionId                String @unique
+  emotionalStability       Int
+  boundaryExpression       Int
+  logicClarity             Int
+  antiFrameControl         Int
+  relationshipPreservation Int
+  effectiveResponse        Int
+  title                    String
+  summary                  String
+  posterPayload            Json
+  createdAt                DateTime @default(now())
+  session                  ArgumentPracticeSession @relation(fields: [sessionId], references: [id])
+}
+
+model ArgumentAnalysisRecord {
+  id               String    @id @default(uuid())
+  userId           String
+  chatTextRedacted String
+  selfSide         String
+  relationship     String
+  analysisGoal     String
+  report           Json
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+  user             User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model MeditationTrack {
+  id          String                  @id @default(uuid())
+  title       String
+  category    MeditationTrackCategory
+  audioUrl    String
+  durationSec Int
+  isActive    Boolean                 @default(true)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  sessions    MeditationSession[]
+}
+
+model MeditationSession {
+  id          String   @id @default(uuid())
+  userId      String
+  trackId     String
+  durationSec Int      @default(0)
+  moodDelta   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  track       MeditationTrack @relation(fields: [trackId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([trackId])
+}
+
+model PrivacyAcknowledgement {
+  id        String   @id @default(uuid())
+  userId    String
+  docType   String
+  version   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}

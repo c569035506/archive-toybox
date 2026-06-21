@@ -1,0 +1,15 @@
+{
+  "name": "archive-toybox",
+  "private": true,
+  "version": "0.1.0",
+  "description": "存档玩具盒 — AI 情绪表达与电子解压工具",
+  "scripts": {
+    "dev:api": "pnpm --filter @archive-toybox/api start:dev",
+    "build:api": "pnpm --filter @archive-toybox/api build",
+    "prisma:generate": "pnpm --filter @archive-toybox/api prisma:generate",
+    "prisma:migrate": "pnpm --filter @archive-toybox/api prisma:migrate",
+    "seed": "pnpm --filter @archive-toybox/api seed",
+    "test:api": "pnpm --filter @archive-toybox/api test"
+  },
+  "packageManager": "pnpm@9.12.0"
+}
