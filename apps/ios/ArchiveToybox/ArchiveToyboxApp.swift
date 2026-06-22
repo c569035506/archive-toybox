@@ -38,6 +38,7 @@ struct PrivacyConsentSheet: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.cyan)
+                    .accessibilityIdentifier("privacyAcceptButton")
                 }
                 .padding(24)
             }

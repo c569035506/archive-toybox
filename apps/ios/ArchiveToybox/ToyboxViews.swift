@@ -157,6 +157,7 @@ struct WoodenFishView: View {
                 .scaleEffect(scale)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("woodenFishButton")
             Text("今日功德 \(todayMerit) · 总功德 \(totalMerit)").font(.title3.bold()).foregroundStyle(.mint)
             Spacer()
         }
@@ -202,6 +203,7 @@ struct LuckyCatView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("luckyCatButton")
             Text("今日招财值 \(todayFortune)").font(.title2.bold()).foregroundStyle(.yellow)
             Spacer()
         }

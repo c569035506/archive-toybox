@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { IsInt, IsISO8601, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { IsInt, IsISO8601, IsOptional, IsString, IsUUID, Min, MinLength } from 'class-validator';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
 import { DevAuthGuard } from '../../common/guards/dev-auth.guard';
 import { MeritService } from './merit.service';
@@ -13,7 +13,8 @@ class WoodenFishTapDto {
 }
 
 class TransferMeritDto {
-  @IsUUID()
+  @IsString()
+  @MinLength(1)
   to_user_id!: string;
 
   @IsInt()

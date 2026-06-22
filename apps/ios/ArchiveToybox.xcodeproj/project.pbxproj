@@ -26,6 +26,7 @@
 		8A0000000000000000000118 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000019 /* KeychainStore.swift */; };
 		8A0000000000000000000119 /* FriendsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000020 /* FriendsViews.swift */; };
 		8A0000000000000000000120 /* ProfileViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000021 /* ProfileViews.swift */; };
+		8B0000000000000000000101 /* ArchiveToyboxUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0000000000000000000001 /* ArchiveToyboxUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,10 +51,19 @@
 		8A0000000000000000000019 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		8A0000000000000000000020 /* FriendsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViews.swift; sourceTree = "<group>"; };
 		8A0000000000000000000021 /* ProfileViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViews.swift; sourceTree = "<group>"; };
+		8B0000000000000000000001 /* ArchiveToyboxUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveToyboxUITests.swift; sourceTree = "<group>"; };
+		8B0000000000000000000016 /* ArchiveToyboxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArchiveToyboxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8A0000000000000000000201 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B0000000000000000000201 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -67,8 +77,17 @@
 			isa = PBXGroup;
 			children = (
 				8A0000000000000000000302 /* ArchiveToybox */,
+				8B0000000000000000000302 /* ArchiveToyboxUITests */,
 				8A0000000000000000000304 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		8B0000000000000000000302 /* ArchiveToyboxUITests */ = {
+			isa = PBXGroup;
+			children = (
+				8B0000000000000000000001 /* ArchiveToyboxUITests.swift */,
+			);
+			path = ArchiveToyboxUITests;
 			sourceTree = "<group>";
 		};
 		8A0000000000000000000302 /* ArchiveToybox */ = {
@@ -110,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				8A0000000000000000000016 /* ArchiveToybox.app */,
+				8B0000000000000000000016 /* ArchiveToyboxUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,6 +154,23 @@
 			productReference = 8A0000000000000000000016 /* ArchiveToybox.app */;
 			productType = "com.apple.product-type.application";
 		};
+		8B0000000000000000000401 /* ArchiveToyboxUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B0000000000000000000702 /* Build configuration list for PBXNativeTarget "ArchiveToyboxUITests" */;
+			buildPhases = (
+				8B0000000000000000000202 /* Sources */,
+				8B0000000000000000000201 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8B0000000000000000000502 /* PBXTargetDependency */,
+			);
+			name = ArchiveToyboxUITests;
+			productName = ArchiveToyboxUITests;
+			productReference = 8B0000000000000000000016 /* ArchiveToyboxUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -146,6 +183,10 @@
 				TargetAttributes = {
 					8A0000000000000000000401 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					8B0000000000000000000401 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 8A0000000000000000000401;
 					};
 				};
 			};
@@ -163,6 +204,7 @@
 			projectRoot = "";
 			targets = (
 				8A0000000000000000000401 /* ArchiveToybox */,
+				8B0000000000000000000401 /* ArchiveToyboxUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -184,6 +226,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXContainerItemProxy section */
+		8B0000000000000000000501 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8A0000000000000000000501 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8A0000000000000000000401;
+			remoteInfo = ArchiveToybox;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		8B0000000000000000000502 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8A0000000000000000000401 /* ArchiveToybox */;
+			targetProxy = 8B0000000000000000000501 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXSourcesBuildPhase section */
 		8A0000000000000000000202 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -201,6 +261,14 @@
 				8A0000000000000000000118 /* KeychainStore.swift in Sources */,
 				8A0000000000000000000119 /* FriendsViews.swift in Sources */,
 				8A0000000000000000000120 /* ProfileViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B0000000000000000000202 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B0000000000000000000101 /* ArchiveToyboxUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,6 +429,42 @@
 			};
 			name = Release;
 		};
+		8B0000000000000000000603 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.archive-toybox.ios.ArchiveToyboxUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = ArchiveToybox;
+			};
+			name = Debug;
+		};
+		8B0000000000000000000604 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.archive-toybox.ios.ArchiveToyboxUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = ArchiveToybox;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -378,6 +482,15 @@
 			buildConfigurations = (
 				8A0000000000000000000603 /* Debug */,
 				8A0000000000000000000604 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8B0000000000000000000702 /* Build configuration list for PBXNativeTarget "ArchiveToyboxUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B0000000000000000000603 /* Debug */,
+				8B0000000000000000000604 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

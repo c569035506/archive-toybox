@@ -15,7 +15,8 @@ import { DevAuthGuard } from '../../common/guards/dev-auth.guard';
 import { FriendsService } from './friends.service';
 
 class SendFriendRequestDto {
-  @IsUUID()
+  @IsString()
+  @MinLength(1)
   to_user_id!: string;
 }
 
