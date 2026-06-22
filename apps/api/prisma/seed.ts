@@ -7,8 +7,8 @@ const tracks = [
     id: 'great-compassion-demo',
     title: '大悲咒静心版',
     category: MeditationTrackCategory.GREAT_COMPASSION_MANTRA,
-    audioUrl: '/audio/great-compassion-demo.wav',
-    durationSec: 60,
+    audioUrl: '/audio/dabei-mantra.mp3',
+    durationSec: 1722,
   },
   {
     id: 'calm-breathing-demo',

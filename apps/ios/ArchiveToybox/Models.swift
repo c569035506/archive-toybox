@@ -36,28 +36,37 @@ struct MeditationTrack: Identifiable, Hashable {
     let title: String
     let categoryLabel: String
     let resourceName: String
+    let fileExtension: String
     let duration: TimeInterval
 
     init(dto: MeditationTrackDTO) {
         id = dto.id
         title = dto.title
         categoryLabel = dto.category.replacingOccurrences(of: "_", with: " ")
-        resourceName = dto.audioUrl.replacingOccurrences(of: "/audio/", with: "").replacingOccurrences(of: ".wav", with: "")
+        let filename = dto.audioUrl.replacingOccurrences(of: "/audio/", with: "")
+        if let dot = filename.lastIndex(of: ".") {
+            resourceName = String(filename[..<dot])
+            fileExtension = String(filename[filename.index(after: dot)...])
+        } else {
+            resourceName = filename
+            fileExtension = "wav"
+        }
         duration = TimeInterval(dto.durationSec)
     }
 
-    init(id: String, title: String, categoryLabel: String, resourceName: String, duration: TimeInterval) {
+    init(
+        id: String,
+        title: String,
+        categoryLabel: String,
+        resourceName: String,
+        fileExtension: String = "wav",
+        duration: TimeInterval
+    ) {
         self.id = id
         self.title = title
         self.categoryLabel = categoryLabel
         self.resourceName = resourceName
+        self.fileExtension = fileExtension
         self.duration = duration
     }
-}
-
-struct BarrageMessage: Identifiable {
-    let id = UUID()
-    let text: String
-    let isPositive: Bool
-    let lane: Int
 }
