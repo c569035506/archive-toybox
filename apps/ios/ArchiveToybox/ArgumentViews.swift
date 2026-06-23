@@ -47,7 +47,6 @@ struct ArgumentSimulationView: View {
     @State private var background = "老板临时改需求，让我今晚重做方案"
     @State private var goal = "表达边界"
     @State private var style = "强势"
-    @State private var isLoading = false
 
     var body: some View {
         Form {
@@ -58,25 +57,10 @@ struct ArgumentSimulationView: View {
                 TextField("你想练习什么", text: $goal)
                 TextField("对方说话风格", text: $style)
             }
-            Section {
-                NavigationLink("开始模拟") {
-                    if isLoading {
-                        ProgressView("创建会话...")
-                    } else {
-                        ArgumentChatView(sessionId: "", openingMessage: "", setupSummary: "")
-                    }
-                }
-                .disabled(isLoading)
-            }
         }
         .scrollContentBackground(.hidden)
         .background(AppBackground())
         .navigationTitle("模拟练习")
-        .background(
-            NavigationLink(isActive: .constant(false)) {
-                EmptyView()
-            } label: { EmptyView() }
-        )
         .safeAreaInset(edge: .bottom) {
             NavigationLink {
                 PracticeSessionLoader(
@@ -97,6 +81,7 @@ struct ArgumentSimulationView: View {
                     .foregroundStyle(.black)
                     .padding()
             }
+            .accessibilityIdentifier("practiceStartButton")
         }
     }
 }

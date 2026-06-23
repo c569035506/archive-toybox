@@ -5,6 +5,61 @@ final class ArchiveToyboxUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testVisualWalkthroughThreeToys() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        if app.buttons["privacyAcceptButton"].waitForExistence(timeout: 3) {
+            app.buttons["privacyAcceptButton"].tap()
+        }
+        XCTAssertTrue(app.staticTexts["玩具盒"].waitForExistence(timeout: 5))
+
+        app.staticTexts["电子木鱼"].tap()
+        XCTAssertTrue(app.buttons["woodenFishButton"].waitForExistence(timeout: 3))
+        app.buttons["woodenFishButton"].tap()
+        app.buttons["woodenFishModeToggle"].tap()
+        sleep(2)
+        captureScreenshot(name: "01-wooden-fish-auto")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        app.staticTexts["招财猫"].tap()
+        XCTAssertTrue(app.otherElements["luckyCatButton"].waitForExistence(timeout: 3))
+        sleep(3)
+        captureScreenshot(name: "02-lucky-cat-coins")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        app.staticTexts["静心弹幕"].tap()
+        app.staticTexts["大悲咒静心版"].tap()
+        XCTAssertTrue(app.navigationBars["静心清耳"].waitForExistence(timeout: 5))
+        sleep(3)
+        captureScreenshot(name: "03-meditation-danmaku")
+    }
+
+    private func captureScreenshot(name: String) {
+        let shot = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: shot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    func testThreeToyGames() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        if app.buttons["privacyAcceptButton"].waitForExistence(timeout: 3) {
+            app.buttons["privacyAcceptButton"].tap()
+        }
+
+        XCTAssertTrue(app.staticTexts["玩具盒"].waitForExistence(timeout: 5))
+
+        try exerciseWoodenFish(app)
+        try exerciseLuckyCat(app)
+        try exerciseMeditation(app)
+    }
+
     func testManualAcceptanceFlows() throws {
         let app = XCUIApplication()
         app.launch()
@@ -28,22 +83,32 @@ final class ArchiveToyboxUITests: XCTestCase {
         app.staticTexts["电子木鱼"].tap()
         XCTAssertTrue(app.buttons["woodenFishButton"].waitForExistence(timeout: 3))
         app.buttons["woodenFishButton"].tap()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '今日功德'")).firstMatch.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["今日功德"].waitForExistence(timeout: 3))
+
+        app.buttons["woodenFishModeToggle"].tap()
+        XCTAssertTrue(app.buttons["woodenFishModeToggle"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["woodenFishSpeedSlider"].waitForExistence(timeout: 3))
+        sleep(1)
+
+        app.buttons["woodenFishModeToggle"].tap()
         app.navigationBars.buttons.element(boundBy: 0).tap()
     }
 
     private func exerciseLuckyCat(_ app: XCUIApplication) throws {
         app.staticTexts["招财猫"].tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '不承诺改变现实'")).firstMatch.waitForExistence(timeout: 3))
-        app.buttons["luckyCatButton"].tap()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '今日招财值'")).firstMatch.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["今日财运"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.otherElements["luckyCatButton"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["luckyCatSpeedSlider"].waitForExistence(timeout: 3))
+        sleep(2)
+
         app.navigationBars.buttons.element(boundBy: 0).tap()
     }
 
     private func exerciseArgumentPractice(_ app: XCUIApplication) throws {
         app.staticTexts["好好吵架"].tap()
         app.staticTexts["模拟练习"].tap()
-        app.buttons["开始模拟"].tap()
+        app.buttons["practiceStartButton"].tap()
         XCTAssertTrue(app.navigationBars["模拟中"].waitForExistence(timeout: 10))
         let field = app.textFields["输入你的回应"]
         field.tap()
@@ -79,9 +144,11 @@ final class ArchiveToyboxUITests: XCTestCase {
         app.staticTexts["静心弹幕"].tap()
         XCTAssertTrue(app.staticTexts["曲目"].waitForExistence(timeout: 5))
         app.staticTexts["大悲咒静心版"].tap()
-        XCTAssertTrue(app.navigationBars["播放中"].waitForExistence(timeout: 5))
-        app.buttons["再来一条"].tap()
-        app.buttons["结束"].tap()
+        XCTAssertTrue(app.navigationBars["静心清耳"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["meditationPlayButton"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["收听"].waitForExistence(timeout: 3))
+        app.buttons["meditationDanmakuToggle"].tap()
+        app.buttons["meditationFinishButton"].tap()
         XCTAssertTrue(app.staticTexts["静心弹幕"].waitForExistence(timeout: 5))
         app.navigationBars.buttons.element(boundBy: 0).tap()
     }

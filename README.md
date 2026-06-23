@@ -15,6 +15,33 @@ pnpm dev:api
 
 iOS 工程位于 `apps/ios/ArchiveToybox.xcodeproj`，用 Xcode 打开即可运行。
 
+## E2E 验收
+
+API 冒烟（需先 `pnpm dev:api`）：
+
+```bash
+pnpm test:e2e
+```
+
+iOS UI 验收（模拟器 + 本地 API）：
+
+```bash
+cd apps/ios
+xcodebuild -scheme ArchiveToybox \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -only-testing:ArchiveToyboxUITests test
+```
+
+完整清单见 `docs/E2E-CHECKLIST.md`。
+
+### 本地 Postgres 排错
+
+若 `pnpm seed` 报 `permission denied for table User`，说明库表由系统用户创建、与 `.env` 中的 `archive_toybox` 账号不一致。任选其一：
+
+1. 使用 Docker：`docker compose up -d postgres` 后重新 `pnpm prisma:migrate && pnpm seed`
+2. 临时改用本机用户连接，例如在 `.env` 中设置  
+   `DATABASE_URL="postgresql://$(whoami)@localhost:5432/archive_toybox?schema=public"`
+
 ## 功能范围
 
 - 玩具盒：电子木鱼、招财猫、好好吵架（模拟练习 / 吵架分析）、静心弹幕
