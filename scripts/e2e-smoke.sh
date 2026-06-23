@@ -26,11 +26,19 @@ request() {
 echo "=== Archive Toybox E2E Smoke ==="
 echo "Base URL: ${BASE_URL}"
 
-health=$(curl -sS "${BASE_URL%/v1}/v1/health" || curl -sS "http://localhost:3000/v1/health")
-echo "$health" | rg -q '"status":"ok"' && pass "health" || fail "health"
+health=$(curl -sS "${BASE_URL%/v1}/v1/health" 2>/dev/null || curl -sS "http://localhost:3000/v1/health" 2>/dev/null || true)
+if ! echo "$health" | rg -q '"status":"ok"'; then
+  echo "❌ API 未就绪。请先启动：docker compose up -d postgres && pnpm seed && pnpm dev:api"
+  exit 1
+fi
+pass "health"
 
 home=$(request GET "/toybox/home")
 echo "$home" | rg -q 'wooden_fish' && pass "toybox/home cards" || fail "toybox/home cards"
+
+profile=$(request GET "/me")
+echo "$profile" | rg -q '"short_id"' && pass "me profile" || fail "me profile ($profile)"
+echo "$profile" | rg -q '"total_merit"' && pass "me profile merit fields" || fail "me profile merit fields ($profile)"
 
 tap_id=$(uuidgen | tr '[:upper:]' '[:lower:]')
 tap=$(request POST "/merit/wooden-fish/tap" "{\"client_request_id\":\"${tap_id}\",\"tapped_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")

@@ -3,12 +3,17 @@ import SwiftUI
 @main
 struct ArchiveToyboxApp: App {
     @StateObject private var appState = AppState()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             RootTabView()
                 .environmentObject(appState)
                 .task { await appState.bootstrap() }
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active else { return }
+                    Task { await appState.flushPendingSync() }
+                }
                 .sheet(isPresented: Binding(
                     get: { !appState.hasAcceptedPrivacy },
                     set: { _ in }

@@ -108,7 +108,7 @@ final class ArchiveToyboxUITests: XCTestCase {
     private func exerciseArgumentPractice(_ app: XCUIApplication) throws {
         app.staticTexts["好好吵架"].tap()
         app.staticTexts["模拟练习"].tap()
-        app.buttons["开始模拟"].tap()
+        app.buttons["practiceStartButton"].tap()
         XCTAssertTrue(app.navigationBars["模拟中"].waitForExistence(timeout: 10))
         let field = app.textFields["输入你的回应"]
         field.tap()

@@ -46,7 +46,12 @@ export class AuthService {
     });
 
     return {
-      ...user,
+      id: user.id,
+      short_id: user.shortId,
+      email: user.email,
+      nickname: user.nickname,
+      avatar_url: user.avatarUrl,
+      total_merit: user.totalMerit,
       today_merit: stats?.todayMerit ?? 0,
       today_fortune: stats?.todayFortune ?? 0,
       meditation_minutes: Math.floor((stats?.meditationSec ?? 0) / 60),

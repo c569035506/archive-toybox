@@ -21,12 +21,12 @@ struct ArgumentReview {
     let summary: String
     let improvementTip: String
 
-    init(from dto: PracticeReviewDTO, bestQuote: String = "我已经在努力了。") {
+    init(from dto: PracticeReviewDTO, bestQuote: String? = nil) {
         title = dto.title
         scores = dto.scores.asArgumentScores
         finalScore = scores.map(\.value).reduce(0, +) / Double(max(scores.count, 1))
         summary = dto.summary
-        self.bestQuote = bestQuote
+        self.bestQuote = bestQuote ?? dto.poster?.bestQuote ?? "我已经在努力了。"
         improvementTip = "下一次可以在表达边界时增加一句对对方需求的承接。"
     }
 }

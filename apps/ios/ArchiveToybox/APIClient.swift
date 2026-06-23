@@ -130,7 +130,7 @@ final class APIClient {
         _ = try await request("friends/requests/\(id)/accept", method: "POST", body: EmptyBody())
     }
 
-    func transferMerit(toUserId: String, amount: Int, clientRequestId: String, message: String?) async throws {
+    func transferMerit(toUserId: String, amount: Int, clientRequestId: String, message: String?) async throws -> MeritTransferResponse {
         struct Body: Encodable {
             let toUserId: String
             let amount: Int
@@ -143,7 +143,10 @@ final class APIClient {
                 case message
             }
         }
-        _ = try await request("merit/transfer", method: "POST", body: Body(toUserId: toUserId, amount: amount, clientRequestId: clientRequestId, message: message))
+        return try JSONDecoder.api.decode(
+            MeritTransferResponse.self,
+            from: try await request("merit/transfer", method: "POST", body: Body(toUserId: toUserId, amount: amount, clientRequestId: clientRequestId, message: message))
+        )
     }
 
     func fetchLegal(doc: String) async throws -> LegalDocument {
@@ -170,12 +173,32 @@ private struct TapPayload: Encodable {
 struct MeritTapResponse: Decodable {
     let todayMerit: Int
     let totalMerit: Int
-    enum CodingKeys: String, CodingKey { case todayMerit = "today_merit"; case totalMerit = "total_merit" }
+    let duplicate: Bool
+    enum CodingKeys: String, CodingKey {
+        case todayMerit = "today_merit"
+        case totalMerit = "total_merit"
+        case duplicate
+    }
 }
 
 struct FortuneTapResponse: Decodable {
     let todayFortune: Int
-    enum CodingKeys: String, CodingKey { case todayFortune = "today_fortune" }
+    let duplicate: Bool
+    enum CodingKeys: String, CodingKey {
+        case todayFortune = "today_fortune"
+        case duplicate
+    }
+}
+
+struct MeritTransferResponse: Decodable {
+    let fromBalance: Int
+    let toBalance: Int?
+    let duplicate: Bool
+    enum CodingKeys: String, CodingKey {
+        case fromBalance = "from_balance"
+        case toBalance = "to_balance"
+        case duplicate
+    }
 }
 
 struct MeditationTrackDTO: Identifiable, Decodable {
@@ -216,12 +239,36 @@ struct PracticeMessageDTO: Decodable, Identifiable {
     let id: String
     let role: String
     let content: String
+    let createdAt: String?
+    enum CodingKeys: String, CodingKey {
+        case id, role, content
+        case createdAt = "created_at"
+    }
+
+    init(id: String, role: String, content: String, createdAt: String? = nil) {
+        self.id = id
+        self.role = role
+        self.content = content
+        self.createdAt = createdAt
+    }
 }
 
 struct PracticeReviewDTO: Decodable {
     let scores: PracticeScores
     let title: String
     let summary: String
+    let poster: PracticePosterPayload?
+}
+
+struct PracticePosterPayload: Decodable {
+    let title: String
+    let subtitle: String?
+    let bestQuote: String?
+    let scores: PracticeScores?
+    enum CodingKeys: String, CodingKey {
+        case title, subtitle, scores
+        case bestQuote = "best_quote"
+    }
 }
 
 struct PracticeScores: Decodable {
@@ -299,10 +346,12 @@ struct AnalysisListItem: Identifiable, Decodable {
     let relationship: String
     let analysisGoal: String
     let oneLiner: String
+    let createdAt: String?
     enum CodingKeys: String, CodingKey {
         case id, relationship
         case analysisGoal = "analysis_goal"
         case oneLiner = "one_liner"
+        case createdAt = "created_at"
     }
 }
 
@@ -310,22 +359,32 @@ struct FriendUser: Identifiable, Decodable {
     let id: String
     let shortId: String
     let nickname: String
+    let avatarUrl: String?
     let totalMerit: Int?
     enum CodingKeys: String, CodingKey {
         case id, nickname
         case shortId = "short_id"
+        case avatarUrl = "avatar_url"
         case totalMerit = "total_merit"
     }
 }
 
 struct FriendRequestsPayload: Decodable {
     let incoming: [FriendRequestItem]
+    let outgoing: [FriendRequestItem]
 }
 
 struct FriendRequestItem: Identifiable, Decodable {
     let id: String
-    let fromUser: FriendUser
-    enum CodingKeys: String, CodingKey { case id; case fromUser = "from_user" }
+    let fromUser: FriendUser?
+    let toUser: FriendUser?
+    let createdAt: String?
+    enum CodingKeys: String, CodingKey {
+        case id
+        case fromUser = "from_user"
+        case toUser = "to_user"
+        case createdAt = "created_at"
+    }
 }
 
 struct LegalDocument: Decodable {

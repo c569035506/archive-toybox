@@ -24,10 +24,13 @@ struct LuckyCatView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             viewModel.onAppear()
-            viewModel.applyTodayFortune(appState.profile?.todayFortune ?? 0)
+            reconcileFromProfile()
             viewModel.onCollectPerformed = {
-                syncCollect()
+                Task { await syncCollect() }
             }
+        }
+        .onChange(of: appState.profile?.todayFortune) { _, _ in
+            reconcileFromProfile()
         }
         .onDisappear {
             viewModel.onDisappear()
@@ -159,13 +162,15 @@ struct LuckyCatView: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(.white.opacity(0.1)))
     }
 
-    private func syncCollect() {
-        Task {
-            if let result = try? await appState.api.tapLuckyCat(clientRequestId: UUID().uuidString) {
-                viewModel.applyTodayFortune(result.todayFortune)
-            }
-            await appState.refreshToyboxHome()
-        }
+    private func reconcileFromProfile() {
+        let pending = appState.syncQueue.pendingCount(for: .luckyCat)
+        let baseToday = appState.profile?.todayFortune ?? 0
+        viewModel.applyTodayFortune(pending > 0 ? baseToday + pending : baseToday)
+    }
+
+    private func syncCollect() async {
+        await appState.recordLuckyCatTap()
+        reconcileFromProfile()
     }
 }
 

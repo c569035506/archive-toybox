@@ -1,4 +1,7 @@
 import { PrismaClient, MeditationTrackCategory } from '@prisma/client';
+import { loadEnvFiles } from '../src/common/utils/load-env';
+
+loadEnvFiles();
 
 const prisma = new PrismaClient();
 

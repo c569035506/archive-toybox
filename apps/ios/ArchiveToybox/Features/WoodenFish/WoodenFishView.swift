@@ -22,13 +22,16 @@ struct WoodenFishView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             viewModel.onAppear()
-            viewModel.applyMerit(
-                today: appState.profile?.todayMerit ?? 0,
-                total: appState.profile?.totalMerit ?? 0
-            )
+            reconcileFromProfile()
             viewModel.onKnockPerformed = {
-                syncKnock()
+                Task { await syncKnock() }
             }
+        }
+        .onChange(of: appState.profile?.todayMerit) { _, _ in
+            reconcileFromProfile()
+        }
+        .onChange(of: appState.profile?.totalMerit) { _, _ in
+            reconcileFromProfile()
         }
         .onDisappear {
             viewModel.onDisappear()
@@ -178,14 +181,20 @@ struct WoodenFishView: View {
         }
     }
 
-    private func syncKnock() {
-        Task {
-            let id = UUID().uuidString
-            if let result = try? await appState.api.tapWoodenFish(clientRequestId: id) {
-                viewModel.applyMerit(today: result.todayMerit, total: result.totalMerit)
-            }
-            await appState.refreshToyboxHome()
+    private func reconcileFromProfile() {
+        let pending = appState.syncQueue.pendingCount(for: .woodenFish)
+        let baseToday = appState.profile?.todayMerit ?? 0
+        let baseTotal = appState.profile?.totalMerit ?? 0
+        if pending > 0 {
+            viewModel.applyMerit(today: baseToday + pending, total: baseTotal + pending)
+        } else {
+            viewModel.applyMerit(today: baseToday, total: baseTotal)
         }
+    }
+
+    private func syncKnock() async {
+        await appState.recordWoodenFishTap()
+        reconcileFromProfile()
     }
 }
 

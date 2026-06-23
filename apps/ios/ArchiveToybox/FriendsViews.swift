@@ -33,7 +33,7 @@ struct FriendsHomeView: View {
                     Section("待处理申请") {
                         ForEach(requests) { request in
                             HStack {
-                                Text(request.fromUser.nickname)
+                                Text(request.fromUser?.nickname ?? "未知用户")
                                 Spacer()
                                 Button("接受") { Task { try? await appState.api.acceptFriendRequest(id: request.id); await reload() } }
                             }
@@ -91,13 +91,13 @@ struct TransferMeritSheet: View {
                     Task {
                         let value = Int(amount) ?? 0
                         do {
-                            try await appState.api.transferMerit(
+                            let result = try await appState.api.transferMerit(
                                 toUserId: friend.id,
                                 amount: value,
                                 clientRequestId: UUID().uuidString,
                                 message: message.isEmpty ? nil : message
                             )
-                            status = "传递成功"
+                            status = result.duplicate ? "已传递过（幂等）" : "传递成功"
                             await appState.refreshProfile()
                         } catch {
                             status = error.localizedDescription
