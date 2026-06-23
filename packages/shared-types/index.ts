@@ -106,6 +106,33 @@ export type PracticeMessage = {
   created_at?: string;
 };
 
+export type PracticeCharacter = {
+  id: string;
+  name: string;
+  relationship: string;
+  opponent_style: string;
+  identity_desc: string;
+  personality_desc: string;
+  voice_gender: string;
+  voice_age: string;
+  memory_summary: string;
+  session_count: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PracticeCharacterListResponse = {
+  characters: PracticeCharacter[];
+};
+
+export type PracticeSessionCreated = {
+  session_id: string;
+  opening_message: string;
+  character_id?: string | null;
+  opponent_voice_gender: string;
+  opponent_voice_age: string;
+};
+
 export type AnalysisReport = {
   one_liner: string;
   root_cause: string;

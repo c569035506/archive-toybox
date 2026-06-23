@@ -113,8 +113,47 @@ Base URL: `http://localhost:3000/v1`
 ### 练习角色
 
 - `GET /argument/practice/characters` → `{ "characters": PracticeCharacter[] }`
-- `POST /argument/practice/characters` — 创建角色（name、relationship、opponent_style、identity_desc、personality_desc、voice_gender、voice_age）
+- `POST /argument/practice/characters` — 创建角色
 - `GET /argument/practice/characters/:id` — 角色详情（含 `memory_summary`、过往练习次数）
+
+#### 创建角色请求
+
+```json
+{
+  "name": "室友",
+  "relationship": "合租",
+  "opponent_style": "逃避",
+  "identity_desc": "上班族，怕冲突",
+  "personality_desc": "爱拖延、绕开正题",
+  "voice_gender": "female",
+  "voice_age": "middle"
+}
+```
+
+`identity_desc`、`personality_desc` 可选，各最多 500 字。  
+`voice_gender`：`male` | `female`（默认 `female`）  
+`voice_age`：`child` | `youth` | `middle` | `elderly`（默认 `middle`）
+
+#### PracticeCharacter
+
+```json
+{
+  "id": "uuid",
+  "name": "室友",
+  "relationship": "合租",
+  "opponent_style": "逃避",
+  "identity_desc": "",
+  "personality_desc": "爱拖延",
+  "voice_gender": "female",
+  "voice_age": "middle",
+  "memory_summary": "上次练习后沉淀的长期记忆…",
+  "session_count": 2,
+  "created_at": "2026-06-23T06:00:00.000Z",
+  "updated_at": "2026-06-23T06:30:00.000Z"
+}
+```
+
+结束练习并复盘后，服务端会更新该角色的 `memory_summary`；下次用同一 `character_id` 开练时，对手 prompt 会注入此记忆。
 
 ### 模拟练习
 
@@ -123,10 +162,23 @@ Base URL: `http://localhost:3000/v1`
   兼容旧版：无 `character_id` 时需传 `opponent_label`、`relationship`、`opponent_style` 等  
   body 可选：`opponent_identity_desc`、`opponent_personality_desc`（各最多 500 字）、`opponent_voice_gender`、`opponent_voice_age`  
   结束练习后会更新角色的 `memory_summary`，下次用同一角色开练时 AI 会读取
-- `GET /argument/practice/sessions/:id` — 会话详情
-- `POST /argument/practice/sessions/:id/messages` — 发送消息
+- `GET /argument/practice/sessions/:id` — 会话详情（含消息列表）
+- `POST /argument/practice/sessions/:id/messages` — 发送消息 → `{ "message": PracticeMessage }`
 - `POST /argument/practice/sessions/:id/finish` → `PracticeReview`
 - `GET /argument/practice/sessions/:id/review` → `PracticeReview`
+
+#### 创建练习会话（推荐）
+
+```json
+{
+  "character_id": "uuid",
+  "what_happened": "又不洗碗",
+  "practice_goal": "表达边界",
+  "relationship": "合租"
+}
+```
+
+`relationship` 可省略，默认用角色上的关系。响应含 `session_id`、`opening_message`、`opponent_voice_gender`、`opponent_voice_age`。
 
 ### PracticeReview
 
@@ -161,5 +213,25 @@ Base URL: `http://localhost:3000/v1`
 - `GET /legal/privacy-policy` → `LegalDocument`
 - `GET /legal/terms` → `LegalDocument`
 - `POST /compliance/privacy-ack` — body: `{ "doc_type": "privacy", "version": "2026-06-21" }`
+
+## AI 与降级
+
+| 环境变量 | 说明 |
+|----------|------|
+| `OPENAI_API_KEY` | OpenAI 或兼容端点密钥 |
+| `OPENAI_BASE_URL` | 默认 `https://api.openai.com/v1` |
+| `OPENAI_MODEL` | 默认 `gpt-4o-mini` |
+
+未配置密钥或模型调用失败时，吵架练习（对手回复、复盘）与吵架分析会返回内置 **fallback** 内容，保证流程可测；生产环境应配置有效密钥。
+
+## 常用脚本
+
+| 命令 | 用途 |
+|------|------|
+| `pnpm prisma:migrate` | 开发中创建/应用迁移 |
+| `pnpm prisma:deploy` | 生产或全新 Docker 库应用已有迁移 |
+| `pnpm prisma:generate` | schema 变更后重新生成 Prisma Client |
+| `pnpm seed` | 写入演示用户与曲目等种子数据 |
+| `pnpm test:e2e` | API 冒烟（`scripts/e2e-smoke.sh`） |
 
 完整 TypeScript 类型见 `packages/shared-types/index.ts`。
