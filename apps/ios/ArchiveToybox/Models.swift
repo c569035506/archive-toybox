@@ -19,15 +19,20 @@ struct ArgumentReview {
     let scores: [ArgumentScore]
     let bestQuote: String
     let summary: String
+    let highlights: [String]
     let improvementTip: String
 
-    init(from dto: PracticeReviewDTO, bestQuote: String? = nil) {
+    init(from dto: PracticeReviewDTO) {
         title = dto.title
         scores = dto.scores.asArgumentScores
         finalScore = scores.map(\.value).reduce(0, +) / Double(max(scores.count, 1))
         summary = dto.summary
-        self.bestQuote = bestQuote ?? dto.poster?.bestQuote ?? "我已经在努力了。"
-        improvementTip = "下一次可以在表达边界时增加一句对对方需求的承接。"
+        let resolvedQuote = dto.bestQuote ?? dto.poster?.bestQuote
+        bestQuote = (resolvedQuote?.isEmpty == false) ? resolvedQuote! : "我已经在努力了。"
+        highlights = dto.highlights ?? dto.poster?.highlights ?? []
+        improvementTip = dto.suggestions?.first
+            ?? dto.poster?.suggestions?.first
+            ?? "下一次可以在表达边界时增加一句对对方需求的承接。"
     }
 }
 

@@ -7,7 +7,7 @@
 ```bash
 pnpm install
 cp .env.example .env
-docker compose up -d postgres
+docker compose up -d postgres   # 数据库在 localhost:5433
 pnpm prisma:migrate
 pnpm seed
 pnpm dev:api
@@ -38,7 +38,7 @@ xcodebuild -scheme ArchiveToybox \
 
 若 `pnpm seed` 报 `permission denied for table User`，说明库表由系统用户创建、与 `.env` 中的 `archive_toybox` 账号不一致。任选其一：
 
-1. 使用 Docker：`docker compose up -d postgres` 后重新 `pnpm prisma:migrate && pnpm seed`
+1. 使用 Docker：`docker compose up -d postgres`（**localhost:5433**）后重新 `pnpm prisma:deploy && pnpm seed`
 2. 临时改用本机用户连接，例如在 `.env` 中设置  
    `DATABASE_URL="postgresql://$(whoami)@localhost:5432/archive_toybox?schema=public"`
 

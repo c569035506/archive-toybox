@@ -42,6 +42,12 @@ struct ArgumentReviewView: View {
                 }
 
                 ReportBlock(title: "本局金句", body: "“\(review.bestQuote)”")
+                if !review.highlights.isEmpty {
+                    ReportBlock(
+                        title: "做得好的点",
+                        body: review.highlights.map { "• \($0)" }.joined(separator: "\n")
+                    )
+                }
                 ReportBlock(title: "AI 改进建议", body: review.improvementTip)
 
                 NavigationLink("生成分享海报") {

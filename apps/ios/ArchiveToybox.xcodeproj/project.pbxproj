@@ -48,6 +48,9 @@
 		8A0000000000000000000140 /* DabeiStageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000041 /* DabeiStageView.swift */; };
 		8A0000000000000000000141 /* MeditationPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000042 /* MeditationPlayerView.swift */; };
 		8A0000000000000000000142 /* dabei-mantra.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000043 /* dabei-mantra.mp3 */; };
+		8A0000000000000000000143 /* PracticeSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000044 /* PracticeSpeechRecognizer.swift */; };
+		8A0000000000000000000144 /* PracticeSpeechSynthesizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000045 /* PracticeSpeechSynthesizer.swift */; };
+		8A0000000000000000000145 /* PracticeOpponentVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0000000000000000000046 /* PracticeOpponentVoice.swift */; };
 		8B0000000000000000000101 /* ArchiveToyboxUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0000000000000000000001 /* ArchiveToyboxUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -95,6 +98,9 @@
 		8A0000000000000000000041 /* DabeiStageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DabeiStageView.swift; sourceTree = "<group>"; };
 		8A0000000000000000000042 /* MeditationPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeditationPlayerView.swift; sourceTree = "<group>"; };
 		8A0000000000000000000043 /* dabei-mantra.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "dabei-mantra.mp3"; sourceTree = "<group>"; };
+		8A0000000000000000000044 /* PracticeSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSpeechRecognizer.swift; sourceTree = "<group>"; };
+		8A0000000000000000000045 /* PracticeSpeechSynthesizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSpeechSynthesizer.swift; sourceTree = "<group>"; };
+		8A0000000000000000000046 /* PracticeOpponentVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeOpponentVoice.swift; sourceTree = "<group>"; };
 		8B0000000000000000000001 /* ArchiveToyboxUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveToyboxUITests.swift; sourceTree = "<group>"; };
 		8B0000000000000000000016 /* ArchiveToyboxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArchiveToyboxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -143,6 +149,9 @@
 				8A0000000000000000000004 /* ToyboxViews.swift */,
 				8A0000000000000000000005 /* MeditationViews.swift */,
 				8A0000000000000000000006 /* ArgumentViews.swift */,
+				8A0000000000000000000044 /* PracticeSpeechRecognizer.swift */,
+				8A0000000000000000000045 /* PracticeSpeechSynthesizer.swift */,
+				8A0000000000000000000046 /* PracticeOpponentVoice.swift */,
 				8A0000000000000000000007 /* PosterViews.swift */,
 				8A0000000000000000000017 /* APIClient.swift */,
 				8A0000000000000000000018 /* AppState.swift */,
@@ -349,6 +358,9 @@
 				8A0000000000000000000104 /* ToyboxViews.swift in Sources */,
 				8A0000000000000000000105 /* MeditationViews.swift in Sources */,
 				8A0000000000000000000106 /* ArgumentViews.swift in Sources */,
+				8A0000000000000000000143 /* PracticeSpeechRecognizer.swift in Sources */,
+				8A0000000000000000000144 /* PracticeSpeechSynthesizer.swift in Sources */,
+				8A0000000000000000000145 /* PracticeOpponentVoice.swift in Sources */,
 				8A0000000000000000000107 /* PosterViews.swift in Sources */,
 				8A0000000000000000000116 /* APIClient.swift in Sources */,
 				8A0000000000000000000117 /* AppState.swift in Sources */,

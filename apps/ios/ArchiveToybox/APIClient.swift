@@ -80,8 +80,46 @@ final class APIClient {
         _ = try await request("meditation/sessions/\(sessionId)/finish", method: "POST", body: Body(durationSec: durationSec, moodDelta: moodDelta))
     }
 
+    func listPracticeCharacters() async throws -> [PracticeCharacterDTO] {
+        struct Payload: Decodable { let characters: [PracticeCharacterDTO] }
+        return try JSONDecoder.api.decode(Payload.self, from: try await request("argument/practice/characters")).characters
+    }
+
+    func createPracticeCharacter(_ input: PracticeCharacterInput) async throws -> PracticeCharacterDTO {
+        try JSONDecoder.api.decode(PracticeCharacterDTO.self, from: try await request("argument/practice/characters", method: "POST", body: input))
+    }
+
     func createPracticeSession(_ setup: PracticeSetupPayload) async throws -> PracticeSessionCreated {
         try JSONDecoder.api.decode(PracticeSessionCreated.self, from: try await request("argument/practice/sessions", method: "POST", body: setup))
+    }
+
+    func createPracticeSession(characterId: String, scenario: PracticeScenarioPayload) async throws -> PracticeSessionCreated {
+        struct Body: Encodable {
+            let characterId: String
+            let relationship: String?
+            let whatHappened: String
+            let practiceGoal: String
+            enum CodingKeys: String, CodingKey {
+                case characterId = "character_id"
+                case relationship
+                case whatHappened = "what_happened"
+                case practiceGoal = "practice_goal"
+            }
+        }
+        let relationship = scenario.relationship.trimmingCharacters(in: .whitespacesAndNewlines)
+        return try JSONDecoder.api.decode(
+            PracticeSessionCreated.self,
+            from: try await request(
+                "argument/practice/sessions",
+                method: "POST",
+                body: Body(
+                    characterId: characterId,
+                    relationship: relationship.isEmpty ? nil : relationship,
+                    whatHappened: scenario.whatHappened,
+                    practiceGoal: scenario.practiceGoal
+                )
+            )
+        )
     }
 
     func sendPracticeMessage(sessionId: String, content: String) async throws -> PracticeMessageDTO {
@@ -214,25 +252,136 @@ struct MeditationTrackDTO: Identifiable, Decodable {
     }
 }
 
+struct PracticeCharacterDTO: Decodable, Identifiable {
+    let id: String
+    let name: String
+    let relationship: String
+    let opponentStyle: String
+    let identityDesc: String
+    let personalityDesc: String
+    let voiceGender: OpponentVoiceGender
+    let voiceAge: OpponentVoiceAge
+    let memorySummary: String
+    let sessionCount: Int
+
+    var voiceProfile: OpponentVoiceProfile {
+        OpponentVoiceProfile(gender: voiceGender, age: voiceAge)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, relationship
+        case opponentStyle = "opponent_style"
+        case identityDesc = "identity_desc"
+        case personalityDesc = "personality_desc"
+        case voiceGender = "voice_gender"
+        case voiceAge = "voice_age"
+        case memorySummary = "memory_summary"
+        case sessionCount = "session_count"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        relationship = try container.decode(String.self, forKey: .relationship)
+        opponentStyle = try container.decode(String.self, forKey: .opponentStyle)
+        identityDesc = try container.decodeIfPresent(String.self, forKey: .identityDesc) ?? ""
+        personalityDesc = try container.decodeIfPresent(String.self, forKey: .personalityDesc) ?? ""
+        if let gender = try container.decodeIfPresent(String.self, forKey: .voiceGender) {
+            voiceGender = OpponentVoiceGender(apiValue: gender)
+        } else {
+            voiceGender = .female
+        }
+        if let age = try container.decodeIfPresent(String.self, forKey: .voiceAge) {
+            voiceAge = OpponentVoiceAge(apiValue: age)
+        } else {
+            voiceAge = .middle
+        }
+        memorySummary = try container.decodeIfPresent(String.self, forKey: .memorySummary) ?? ""
+        sessionCount = try container.decodeIfPresent(Int.self, forKey: .sessionCount) ?? 0
+    }
+}
+
+struct PracticeCharacterInput: Encodable {
+    let name: String
+    let relationship: String
+    let opponentStyle: String
+    let identityDesc: String
+    let personalityDesc: String
+    let voiceGender: OpponentVoiceGender
+    let voiceAge: OpponentVoiceAge
+
+    enum CodingKeys: String, CodingKey {
+        case name, relationship
+        case opponentStyle = "opponent_style"
+        case identityDesc = "identity_desc"
+        case personalityDesc = "personality_desc"
+        case voiceGender = "voice_gender"
+        case voiceAge = "voice_age"
+    }
+}
+
+struct PracticeScenarioPayload {
+    let relationship: String
+    let whatHappened: String
+    let practiceGoal: String
+}
+
 struct PracticeSetupPayload: Encodable {
     let opponentLabel: String
     let relationship: String
     let whatHappened: String
     let practiceGoal: String
     let opponentStyle: String
+    let opponentIdentityDesc: String
+    let opponentPersonalityDesc: String
+    let opponentVoiceGender: OpponentVoiceGender
+    let opponentVoiceAge: OpponentVoiceAge
     enum CodingKeys: String, CodingKey {
         case opponentLabel = "opponent_label"
         case relationship
         case whatHappened = "what_happened"
         case practiceGoal = "practice_goal"
         case opponentStyle = "opponent_style"
+        case opponentIdentityDesc = "opponent_identity_desc"
+        case opponentPersonalityDesc = "opponent_personality_desc"
+        case opponentVoiceGender = "opponent_voice_gender"
+        case opponentVoiceAge = "opponent_voice_age"
     }
 }
 
 struct PracticeSessionCreated: Decodable {
     let sessionId: String
     let openingMessage: String
-    enum CodingKeys: String, CodingKey { case sessionId = "session_id"; case openingMessage = "opening_message" }
+    let opponentVoiceGender: OpponentVoiceGender
+    let opponentVoiceAge: OpponentVoiceAge
+
+    var voiceProfile: OpponentVoiceProfile {
+        OpponentVoiceProfile(gender: opponentVoiceGender, age: opponentVoiceAge)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case sessionId = "session_id"
+        case openingMessage = "opening_message"
+        case opponentVoiceGender = "opponent_voice_gender"
+        case opponentVoiceAge = "opponent_voice_age"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        sessionId = try container.decode(String.self, forKey: .sessionId)
+        openingMessage = try container.decode(String.self, forKey: .openingMessage)
+        if let gender = try container.decodeIfPresent(String.self, forKey: .opponentVoiceGender) {
+            opponentVoiceGender = OpponentVoiceGender(apiValue: gender)
+        } else {
+            opponentVoiceGender = .female
+        }
+        if let age = try container.decodeIfPresent(String.self, forKey: .opponentVoiceAge) {
+            opponentVoiceAge = OpponentVoiceAge(apiValue: age)
+        } else {
+            opponentVoiceAge = .middle
+        }
+    }
 }
 
 struct PracticeMessageDTO: Decodable, Identifiable {
@@ -257,16 +406,25 @@ struct PracticeReviewDTO: Decodable {
     let scores: PracticeScores
     let title: String
     let summary: String
+    let highlights: [String]?
+    let suggestions: [String]?
+    let bestQuote: String?
     let poster: PracticePosterPayload?
+    enum CodingKeys: String, CodingKey {
+        case scores, title, summary, highlights, suggestions, poster
+        case bestQuote = "best_quote"
+    }
 }
 
 struct PracticePosterPayload: Decodable {
     let title: String
     let subtitle: String?
     let bestQuote: String?
+    let highlights: [String]?
+    let suggestions: [String]?
     let scores: PracticeScores?
     enum CodingKeys: String, CodingKey {
-        case title, subtitle, scores
+        case title, subtitle, scores, highlights, suggestions
         case bestQuote = "best_quote"
     }
 }

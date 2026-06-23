@@ -93,6 +93,9 @@ export type PracticeReview = {
   scores: PracticeScores;
   title: string;
   summary: string;
+  highlights: string[];
+  suggestions: string[];
+  best_quote: string;
   poster: unknown;
 };
 

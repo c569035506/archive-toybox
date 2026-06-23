@@ -108,6 +108,19 @@ final class ArchiveToyboxUITests: XCTestCase {
     private func exerciseArgumentPractice(_ app: XCUIApplication) throws {
         app.staticTexts["好好吵架"].tap()
         app.staticTexts["模拟练习"].tap()
+
+        if app.buttons["practiceCreateCharacterButton"].waitForExistence(timeout: 3) {
+            app.buttons["practiceCreateCharacterButton"].tap()
+            app.buttons["practiceSaveCharacterButton"].tap()
+            XCTAssertTrue(app.buttons["practiceStartButton"].waitForExistence(timeout: 10))
+        } else if app.buttons["practiceStartButton"].exists {
+            // already on setup from a saved character
+        } else {
+            app.buttons["practiceCreateCharacterButton"].tap()
+            app.buttons["practiceSaveCharacterButton"].tap()
+            XCTAssertTrue(app.buttons["practiceStartButton"].waitForExistence(timeout: 10))
+        }
+
         app.buttons["practiceStartButton"].tap()
         XCTAssertTrue(app.navigationBars["模拟中"].waitForExistence(timeout: 10))
         let field = app.textFields["输入你的回应"]

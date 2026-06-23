@@ -8,7 +8,8 @@ services:
       POSTGRES_PASSWORD: archive_toybox
       POSTGRES_DB: archive_toybox
     ports:
-      - "5432:5432"
+      # 5433 避免与本机 Postgres（常占用 127.0.0.1:5432）冲突
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

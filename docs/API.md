@@ -110,11 +110,38 @@ Base URL: `http://localhost:3000/v1`
 
 ## 好好吵架
 
-- `POST /argument/practice/sessions` — 创建模拟练习
+### 练习角色
+
+- `GET /argument/practice/characters` → `{ "characters": PracticeCharacter[] }`
+- `POST /argument/practice/characters` — 创建角色（name、relationship、opponent_style、identity_desc、personality_desc、voice_gender、voice_age）
+- `GET /argument/practice/characters/:id` — 角色详情（含 `memory_summary`、过往练习次数）
+
+### 模拟练习
+
+- `POST /argument/practice/sessions` — 创建模拟练习  
+  推荐 body：`character_id` + `what_happened` + `practice_goal`（可选 `relationship` 覆盖角色默认关系）  
+  兼容旧版：无 `character_id` 时需传 `opponent_label`、`relationship`、`opponent_style` 等  
+  body 可选：`opponent_identity_desc`、`opponent_personality_desc`（各最多 500 字）、`opponent_voice_gender`、`opponent_voice_age`  
+  结束练习后会更新角色的 `memory_summary`，下次用同一角色开练时 AI 会读取
 - `GET /argument/practice/sessions/:id` — 会话详情
 - `POST /argument/practice/sessions/:id/messages` — 发送消息
 - `POST /argument/practice/sessions/:id/finish` → `PracticeReview`
 - `GET /argument/practice/sessions/:id/review` → `PracticeReview`
+
+### PracticeReview
+
+```json
+{
+  "scores": { "emotional_stability": 4, "...": 4 },
+  "title": "边界守夜人",
+  "summary": "复盘摘要",
+  "highlights": ["做得好的点"],
+  "suggestions": ["可改进点"],
+  "best_quote": "用户本局最佳表达",
+  "poster": { "title": "...", "subtitle": "...", "best_quote": "...", "highlights": [], "suggestions": [], "scores": {} }
+}
+```
+
 - `POST /argument/analysis` — 创建分析（需 `privacy_acknowledged: true`）
 - `GET /argument/analysis` → `{ "items": AnalysisListItem[] }`
 - `GET /argument/analysis/:id` — 单条详情

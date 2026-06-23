@@ -8,6 +8,8 @@
     "build:api": "pnpm --filter @archive-toybox/api build",
     "prisma:generate": "pnpm --filter @archive-toybox/api prisma:generate",
     "prisma:migrate": "pnpm --filter @archive-toybox/api prisma:migrate",
+    "prisma:deploy": "pnpm --filter @archive-toybox/api prisma:deploy",
+    "prisma:push": "pnpm --filter @archive-toybox/api prisma:push",
     "seed": "pnpm --filter @archive-toybox/api seed",
     "test:api": "pnpm --filter @archive-toybox/api test",
     "test:e2e": "bash scripts/e2e-smoke.sh"

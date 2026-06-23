@@ -49,6 +49,7 @@ model User {
   friendshipsA           Friendship[]               @relation("UserA")
   friendshipsB           Friendship[]               @relation("UserB")
   practiceSessions       ArgumentPracticeSession[]
+  practiceCharacters     ArgumentPracticeCharacter[]
   analysisRecords        ArgumentAnalysisRecord[]
   meditationSessions     MeditationSession[]
   privacyAcks            PrivacyAcknowledgement[]
@@ -106,18 +107,43 @@ model Friendship {
   @@unique([userAId, userBId])
 }
 
+model ArgumentPracticeCharacter {
+  id              String   @id @default(uuid())
+  userId          String
+  name            String
+  relationship    String   @default("")
+  opponentStyle   String
+  identityDesc    String   @default("")
+  personalityDesc String   @default("")
+  voiceGender     String   @default("female")
+  voiceAge        String   @default("middle")
+  memorySummary   String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
+  sessions        ArgumentPracticeSession[]
+
+  @@index([userId, updatedAt])
+}
+
 model ArgumentPracticeSession {
   id            String                @id @default(uuid())
   userId        String
+  characterId   String?
   status        ArgumentSessionStatus @default(ACTIVE)
   opponentLabel String
   relationship  String
   whatHappened  String
   practiceGoal  String
   opponentStyle String
+  opponentIdentityDesc String @default("")
+  opponentPersonalityDesc String @default("")
+  opponentVoiceGender String @default("female")
+  opponentVoiceAge    String @default("middle")
   createdAt     DateTime              @default(now())
   finishedAt    DateTime?
   user          User                  @relation(fields: [userId], references: [id])
+  character     ArgumentPracticeCharacter? @relation(fields: [characterId], references: [id])
   messages      ArgumentPracticeMessage[]
   review        ArgumentPracticeReview?
 }

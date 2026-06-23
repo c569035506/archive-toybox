@@ -57,13 +57,18 @@ session_id=$(echo "$session" | python3 -c 'import sys,json; print(json.load(sys.
 request PATCH "/meditation/sessions/${session_id}/progress" '{"duration_sec":15}' >/dev/null && pass "meditation progress" || fail "meditation progress"
 request POST "/meditation/sessions/${session_id}/finish" '{"duration_sec":30,"mood_delta":{"calm":1}}' >/dev/null && pass "meditation finish" || fail "meditation finish"
 
-practice=$(request POST "/argument/practice/sessions" '{"opponent_label":"室友","relationship":"合租","what_happened":"不洗碗","practice_goal":"表达边界","opponent_style":"逃避"}')
+practice=$(request POST "/argument/practice/characters" '{"name":"室友","relationship":"合租","opponent_style":"逃避","personality_desc":"爱拖延、怕冲突"}')
+character_id=$(echo "$practice" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
+pass "argument practice character create"
+practice=$(request POST "/argument/practice/sessions" "{\"character_id\":\"${character_id}\",\"what_happened\":\"不洗碗\",\"practice_goal\":\"表达边界\"}")
 practice_id=$(echo "$practice" | python3 -c 'import sys,json; print(json.load(sys.stdin)["session_id"])')
 pass "argument practice create"
 msg=$(request POST "/argument/practice/sessions/${practice_id}/messages" '{"content":"我们能不能轮流洗碗？"}')
 echo "$msg" | rg -q '"role":"assistant"' && pass "argument practice message" || fail "argument practice message"
 review=$(request POST "/argument/practice/sessions/${practice_id}/finish" '{}')
 echo "$review" | rg -q 'emotional_stability' && pass "argument practice review" || fail "argument practice review"
+echo "$review" | rg -q '"highlights"' && pass "argument practice review highlights" || fail "argument practice review highlights ($review)"
+echo "$review" | rg -q '"suggestions"' && pass "argument practice review suggestions" || fail "argument practice review suggestions ($review)"
 
 analysis=$(request POST "/argument/analysis" '{"chat_text":"A: 你怎么又这样\nB: 你才是","self_side":"A","relationship":"情侣","analysis_goal":"看清升级点","privacy_acknowledged":true}')
 analysis_id=$(echo "$analysis" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
