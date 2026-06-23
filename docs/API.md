@@ -115,6 +115,8 @@ Base URL: `http://localhost:3000/v1`
 - `GET /argument/practice/characters` → `{ "characters": PracticeCharacter[] }`
 - `POST /argument/practice/characters` — 创建角色
 - `GET /argument/practice/characters/:id` — 角色详情（含 `memory_summary`、过往练习次数）
+- `PATCH /argument/practice/characters/:id` — 更新角色（body 同创建；`memory_summary` 由复盘自动维护，不可通过此接口修改）
+- `DELETE /argument/practice/characters/:id` → `{ "deleted": true }`（历史练习会话保留，`character_id` 置空）
 
 #### 创建角色请求
 

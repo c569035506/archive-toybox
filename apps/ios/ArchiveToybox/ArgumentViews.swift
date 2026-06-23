@@ -45,6 +45,8 @@ struct ArgumentCharacterHubView: View {
     @State private var characters: [PracticeCharacterDTO] = []
     @State private var isLoading = true
     @State private var error: String?
+    @State private var characterPendingDelete: PracticeCharacterDTO?
+    @State private var characterToEdit: PracticeCharacterDTO?
 
     var body: some View {
         Group {
@@ -59,7 +61,7 @@ struct ArgumentCharacterHubView: View {
                     Text("先创建一个 AI 对方，设定身份和性格，再开始模拟对话。")
                 } actions: {
                     NavigationLink {
-                        ArgumentCharacterCreateView()
+                        ArgumentCharacterFormView()
                     } label: {
                         Text("创建角色")
                     }
@@ -71,7 +73,7 @@ struct ArgumentCharacterHubView: View {
                 List {
                     Section {
                         NavigationLink {
-                            ArgumentCharacterCreateView()
+                            ArgumentCharacterFormView()
                         } label: {
                             Label("创建新角色", systemImage: "plus.circle.fill")
                                 .foregroundStyle(.cyan)
@@ -86,6 +88,26 @@ struct ArgumentCharacterHubView: View {
                                 PracticeCharacterRow(character: character)
                             }
                             .accessibilityIdentifier("practiceCharacterRow-\(character.id)")
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    characterPendingDelete = character
+                                } label: {
+                                    Label("删除", systemImage: "trash")
+                                }
+                                .accessibilityIdentifier("practiceDeleteCharacterButton-\(character.id)")
+                            }
+                            .contextMenu {
+                                Button {
+                                    characterToEdit = character
+                                } label: {
+                                    Label("编辑", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    characterPendingDelete = character
+                                } label: {
+                                    Label("删除", systemImage: "trash")
+                                }
+                            }
                         }
                     }
                 }
@@ -94,8 +116,33 @@ struct ArgumentCharacterHubView: View {
         }
         .background(AppBackground())
         .navigationTitle("选择角色")
+        .navigationDestination(item: $characterToEdit) { character in
+            ArgumentCharacterFormView(existing: character, onSaved: {
+                Task { await loadCharacters() }
+            })
+        }
         .refreshable { await loadCharacters() }
         .onAppear { Task { await loadCharacters() } }
+        .alert(
+            "删除「\(characterPendingDelete?.name ?? "")」？",
+            isPresented: Binding(
+                get: { characterPendingDelete != nil },
+                set: { if !$0 { characterPendingDelete = nil } }
+            ),
+            actions: {
+                Button("删除", role: .destructive) {
+                    guard let character = characterPendingDelete else { return }
+                    characterPendingDelete = nil
+                    Task { await deleteCharacter(character) }
+                }
+                Button("取消", role: .cancel) {
+                    characterPendingDelete = nil
+                }
+            },
+            message: {
+                Text("删除后无法恢复；历史练习记录会保留，但不再关联此角色。")
+            }
+        )
     }
 
     private func loadCharacters() async {
@@ -104,6 +151,15 @@ struct ArgumentCharacterHubView: View {
         defer { isLoading = false }
         do {
             characters = try await appState.api.listPracticeCharacters()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    private func deleteCharacter(_ character: PracticeCharacterDTO) async {
+        do {
+            try await appState.api.deletePracticeCharacter(id: character.id)
+            characters.removeAll { $0.id == character.id }
         } catch {
             self.error = error.localizedDescription
         }
@@ -147,8 +203,12 @@ struct PracticeCharacterRow: View {
     }
 }
 
-struct ArgumentCharacterCreateView: View {
+struct ArgumentCharacterFormView: View {
     @EnvironmentObject private var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+    var existing: PracticeCharacterDTO?
+    var onSaved: (() -> Void)?
+
     @State private var name = "老板"
     @State private var relationship = "上下级"
     @State private var style = "强势"
@@ -159,11 +219,24 @@ struct ArgumentCharacterCreateView: View {
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var createdCharacter: PracticeCharacterDTO?
+    @State private var didPrefill = false
+
+    private var isEditing: Bool { existing != nil }
 
     var body: some View {
         Form {
             if let saveError {
                 Text(saveError).font(.footnote).foregroundStyle(.orange)
+            }
+            if isEditing, let existing, !existing.memorySummary.isEmpty {
+                Section("跨场次记忆") {
+                    Text(existing.memorySummary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Text("记忆由练习复盘自动更新，此处仅展示。")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
             Section("角色是谁") {
                 TextField("称呼/角色", text: $name)
@@ -195,9 +268,10 @@ struct ArgumentCharacterCreateView: View {
         }
         .scrollContentBackground(.hidden)
         .background(AppBackground())
-        .navigationTitle("创建角色")
+        .navigationTitle(isEditing ? "编辑角色" : "创建角色")
+        .onAppear { prefillIfNeeded() }
         .safeAreaInset(edge: .bottom) {
-            if let createdCharacter {
+            if let createdCharacter, !isEditing {
                 NavigationLink {
                     ArgumentPracticeSetupView(character: createdCharacter)
                 } label: {
@@ -214,7 +288,7 @@ struct ArgumentCharacterCreateView: View {
                 Button {
                     Task { await saveCharacter() }
                 } label: {
-                    Text(isSaving ? "保存中…" : "保存角色")
+                    Text(isSaving ? "保存中…" : (isEditing ? "保存修改" : "保存角色"))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -223,26 +297,45 @@ struct ArgumentCharacterCreateView: View {
                         .padding()
                 }
                 .disabled(isSaving || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityIdentifier("practiceSaveCharacterButton")
+                .accessibilityIdentifier(isEditing ? "practiceUpdateCharacterButton" : "practiceSaveCharacterButton")
             }
         }
+    }
+
+    private func prefillIfNeeded() {
+        guard !didPrefill, let existing else { return }
+        didPrefill = true
+        name = existing.name
+        relationship = existing.relationship
+        style = existing.opponentStyle
+        identityDesc = existing.identityDesc
+        personalityDesc = existing.personalityDesc
+        voiceGender = existing.voiceGender
+        voiceAge = existing.voiceAge
     }
 
     private func saveCharacter() async {
         isSaving = true
         saveError = nil
         defer { isSaving = false }
+        let input = PracticeCharacterInput(
+            name: name,
+            relationship: relationship,
+            opponentStyle: style,
+            identityDesc: identityDesc,
+            personalityDesc: personalityDesc,
+            voiceGender: voiceGender,
+            voiceAge: voiceAge
+        )
         do {
-            let character = try await appState.api.createPracticeCharacter(.init(
-                name: name,
-                relationship: relationship,
-                opponentStyle: style,
-                identityDesc: identityDesc,
-                personalityDesc: personalityDesc,
-                voiceGender: voiceGender,
-                voiceAge: voiceAge
-            ))
-            createdCharacter = character
+            if let existing {
+                _ = try await appState.api.updatePracticeCharacter(id: existing.id, input)
+                onSaved?()
+                dismiss()
+            } else {
+                let character = try await appState.api.createPracticeCharacter(input)
+                createdCharacter = character
+            }
         } catch {
             saveError = error.localizedDescription
         }

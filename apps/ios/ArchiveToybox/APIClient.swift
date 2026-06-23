@@ -89,6 +89,17 @@ final class APIClient {
         try JSONDecoder.api.decode(PracticeCharacterDTO.self, from: try await request("argument/practice/characters", method: "POST", body: input))
     }
 
+    func updatePracticeCharacter(id: String, _ input: PracticeCharacterInput) async throws -> PracticeCharacterDTO {
+        try JSONDecoder.api.decode(
+            PracticeCharacterDTO.self,
+            from: try await request("argument/practice/characters/\(id)", method: "PATCH", body: input)
+        )
+    }
+
+    func deletePracticeCharacter(id: String) async throws {
+        _ = try await request("argument/practice/characters/\(id)", method: "DELETE")
+    }
+
     func createPracticeSession(_ setup: PracticeSetupPayload) async throws -> PracticeSessionCreated {
         try JSONDecoder.api.decode(PracticeSessionCreated.self, from: try await request("argument/practice/sessions", method: "POST", body: setup))
     }
@@ -252,7 +263,7 @@ struct MeditationTrackDTO: Identifiable, Decodable {
     }
 }
 
-struct PracticeCharacterDTO: Decodable, Identifiable {
+struct PracticeCharacterDTO: Decodable, Identifiable, Hashable {
     let id: String
     let name: String
     let relationship: String
@@ -299,6 +310,14 @@ struct PracticeCharacterDTO: Decodable, Identifiable {
         }
         memorySummary = try container.decodeIfPresent(String.self, forKey: .memorySummary) ?? ""
         sessionCount = try container.decodeIfPresent(Int.self, forKey: .sessionCount) ?? 0
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: PracticeCharacterDTO, rhs: PracticeCharacterDTO) -> Bool {
+        lhs.id == rhs.id
     }
 }
 

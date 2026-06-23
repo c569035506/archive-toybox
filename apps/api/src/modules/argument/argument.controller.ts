@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -53,6 +54,8 @@ class CreatePracticeCharacterDto {
   @IsIn([...PRACTICE_VOICE_AGES])
   voice_age?: string;
 }
+
+class UpdatePracticeCharacterDto extends CreatePracticeCharacterDto {}
 
 class CreatePracticeSessionDto {
   @IsOptional()
@@ -152,6 +155,23 @@ export class ArgumentController {
     @Param('id') id: string,
   ) {
     return this.argumentService.getPracticeCharacter(user.id, id);
+  }
+
+  @Patch('practice/characters/:id')
+  updateCharacter(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdatePracticeCharacterDto,
+  ) {
+    return this.argumentService.updatePracticeCharacter(user.id, id, dto);
+  }
+
+  @Delete('practice/characters/:id')
+  deleteCharacter(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
+    return this.argumentService.deletePracticeCharacter(user.id, id);
   }
 
   @Post('practice/sessions')

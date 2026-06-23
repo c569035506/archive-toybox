@@ -99,6 +99,48 @@ export class ArgumentService {
     return this.toCharacterPayload(character);
   }
 
+  async updatePracticeCharacter(
+    userId: string,
+    characterId: string,
+    input: {
+      name: string;
+      relationship: string;
+      opponent_style: string;
+      identity_desc?: string;
+      personality_desc?: string;
+      voice_gender?: string;
+      voice_age?: string;
+    },
+  ) {
+    await this.getOwnedCharacter(userId, characterId);
+    const voiceGender = (input.voice_gender ?? 'female') as PracticeVoiceGender;
+    const voiceAge = (input.voice_age ?? 'middle') as PracticeVoiceAge;
+
+    const character = await this.prisma.argumentPracticeCharacter.update({
+      where: { id: characterId },
+      data: {
+        name: input.name.trim(),
+        relationship: input.relationship.trim(),
+        opponentStyle: input.opponent_style.trim(),
+        identityDesc: input.identity_desc?.trim() ?? '',
+        personalityDesc: input.personality_desc?.trim() ?? '',
+        voiceGender,
+        voiceAge,
+      },
+      include: { _count: { select: { sessions: true } } },
+    });
+
+    return this.toCharacterPayload(character);
+  }
+
+  async deletePracticeCharacter(userId: string, characterId: string) {
+    await this.getOwnedCharacter(userId, characterId);
+    await this.prisma.argumentPracticeCharacter.delete({
+      where: { id: characterId },
+    });
+    return { deleted: true };
+  }
+
   async getPracticeCharacter(userId: string, characterId: string) {
     const character = await this.getOwnedCharacter(userId, characterId);
     const withCount = await this.prisma.argumentPracticeCharacter.findUniqueOrThrow({
